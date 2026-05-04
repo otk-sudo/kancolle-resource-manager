@@ -4,6 +4,7 @@ import { Header } from './components/layout/Header'
 import { Dashboard } from './pages/Dashboard'
 import { ImprovementPlanner } from './pages/ImprovementPlanner'
 import { Forecast } from './pages/Forecast'
+import { MissionManager } from './pages/MissionManager'
 
 function App() {
   // localStorage からテーマを復元、デフォルトはダーク
@@ -30,7 +31,7 @@ function App() {
         <Route path="/" element={<Dashboard />} />
         {/* 他画面は今後実装 */}
         <Route path="/planner"  element={<ImprovementPlanner />} />
-        <Route path="/missions" element={<div style={{ padding: '24px', color: 'var(--text-s)' }}>任務管理（実装予定）</div>} />
+        <Route path="/missions" element={<MissionManager />} />
         <Route path="/forecast" element={<Forecast />} />
       </Routes>
     </HashRouter>
