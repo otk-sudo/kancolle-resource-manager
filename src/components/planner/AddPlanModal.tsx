@@ -1,10 +1,12 @@
 import { useState } from 'react'
 import { useImprovementStore } from '../../stores/improvementStore'
-import type { ImprovableEquipment, ChainStep, Priority } from '../../types/improvement'
+import type { ImprovableEquipment, ChainStep, Priority, ImprovementPlan } from '../../types/improvement'
 
 interface Props {
   equipments: ImprovableEquipment[]
   onClose: () => void
+  /** 編集モード：指定した場合はそのプランを編集する */
+  editPlan?: ImprovementPlan
 }
 
 const PRIORITY_OPTIONS: { value: Priority; label: string }[] = [
@@ -13,22 +15,33 @@ const PRIORITY_OPTIONS: { value: Priority; label: string }[] = [
   { value: 'low', label: '低' },
 ]
 
-export function AddPlanModal({ equipments, onClose }: Props) {
-  const { addPlan } = useImprovementStore()
-  const [steps, setSteps] = useState<ChainStep[]>([
-    { equipId: 0, equipName: '', targetStar: 6, currentStar: 0 },
-  ])
-  const [priority, setPriority] = useState<Priority>('medium')
-  const [deadline, setDeadline] = useState('')
+export function AddPlanModal({ equipments, onClose, editPlan }: Props) {
+  const { addPlan, updatePlan } = useImprovementStore()
+  const isEdit = editPlan !== undefined
+
+  const [steps, setSteps] = useState<ChainStep[]>(
+    isEdit ? editPlan.steps : [{ equipId: 0, equipName: '', targetStar: 6, currentStar: 0 }]
+  )
+  const [priority, setPriority] = useState<Priority>(isEdit ? editPlan.priority : 'medium')
+  const [deadline, setDeadline] = useState(isEdit ? (editPlan.deadline ?? '') : '')
 
   const handleSubmit = () => {
-    const validSteps = steps.filter(s => s.equipId > 0)
+    const validSteps = steps.filter(s => s.equipId > 0 || s.equipName !== '')
     if (validSteps.length === 0) return
-    addPlan({
-      steps: validSteps,
-      priority,
-      deadline: deadline || undefined,
-    })
+
+    if (isEdit) {
+      updatePlan(editPlan.id, {
+        steps: validSteps,
+        priority,
+        deadline: deadline || undefined,
+      })
+    } else {
+      addPlan({
+        steps: validSteps,
+        priority,
+        deadline: deadline || undefined,
+      })
+    }
     onClose()
   }
 
@@ -73,7 +86,7 @@ export function AddPlanModal({ equipments, onClose }: Props) {
         overflowY: 'auto',
       }}>
         <h2 style={{ fontSize: '16px', fontWeight: 700, color: 'var(--text-h)', marginBottom: '20px' }}>
-          改修プランを追加
+          {isEdit ? '改修プランを編集' : '改修プランを追加'}
         </h2>
 
         {/* 改修チェーンステップ */}
@@ -202,7 +215,7 @@ export function AddPlanModal({ equipments, onClose }: Props) {
               borderRadius: '6px', cursor: 'pointer', color: '#fff',
             }}
           >
-            追加
+            {isEdit ? '保存' : '追加'}
           </button>
         </div>
       </div>

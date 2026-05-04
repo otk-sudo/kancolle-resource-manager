@@ -102,7 +102,7 @@ describe('ImprovementCard', () => {
 
   it('should highlight card when today secretary is available', () => {
     // Arrange & Act
-    const { container } = render(
+    render(
       <ImprovementCard
         plan={MOCK_PLAN}
         equipments={MOCK_EQUIPMENT}
@@ -114,6 +114,28 @@ describe('ImprovementCard', () => {
 
     // Assert — 今日可能バッジが表示される
     expect(screen.getByText(/今日可能/)).toBeInTheDocument()
+  })
+
+  it('should call onEdit when edit button is clicked', () => {
+    // Arrange
+    const onEdit = vi.fn()
+    render(
+      <ImprovementCard
+        plan={MOCK_PLAN}
+        equipments={MOCK_EQUIPMENT}
+        todayWeekday={1}
+        onArchive={vi.fn()}
+        onUpdate={vi.fn()}
+        onEdit={onEdit}
+      />
+    )
+    fireEvent.click(screen.getByRole('button', { name: /展開|詳細|▼|▶/ }))
+
+    // Act
+    fireEvent.click(screen.getByRole('button', { name: /編集/ }))
+
+    // Assert
+    expect(onEdit).toHaveBeenCalledWith(MOCK_PLAN)
   })
 
   it('should display deadline when set', () => {

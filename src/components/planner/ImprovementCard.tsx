@@ -15,9 +15,10 @@ interface Props {
   todayWeekday: number
   onArchive: (id: string) => void
   onUpdate: (id: string, patch: Partial<ImprovementPlan>) => void
+  onEdit?: (plan: ImprovementPlan) => void
 }
 
-export function ImprovementCard({ plan, equipments, todayWeekday, onArchive }: Props) {
+export function ImprovementCard({ plan, equipments, todayWeekday, onArchive, onEdit }: Props) {
   const [expanded, setExpanded] = useState(false)
 
   // 今日改修可能な装備IDのセット
@@ -150,7 +151,21 @@ export function ImprovementCard({ plan, equipments, todayWeekday, onArchive }: P
             )
           })}
 
-          <div style={{ marginTop: '12px', display: 'flex', justifyContent: 'flex-end' }}>
+          <div style={{ marginTop: '12px', display: 'flex', gap: '8px', justifyContent: 'flex-end' }}>
+            {onEdit && (
+              <button
+                aria-label="編集"
+                onClick={() => onEdit(plan)}
+                style={{
+                  fontSize: '12px', padding: '4px 12px',
+                  background: 'none', border: '1px solid var(--border)',
+                  borderRadius: '6px', cursor: 'pointer',
+                  color: 'var(--text-s)',
+                }}
+              >
+                編集
+              </button>
+            )}
             <button
               aria-label="アーカイブ"
               onClick={() => onArchive(plan.id)}
