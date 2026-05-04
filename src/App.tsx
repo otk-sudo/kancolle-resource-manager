@@ -3,6 +3,7 @@ import { HashRouter, Routes, Route } from 'react-router-dom'
 import { Header } from './components/layout/Header'
 import { Dashboard } from './pages/Dashboard'
 import { ImprovementPlanner } from './pages/ImprovementPlanner'
+import { Forecast } from './pages/Forecast'
 
 function App() {
   // localStorage からテーマを復元、デフォルトはダーク
@@ -30,7 +31,7 @@ function App() {
         {/* 他画面は今後実装 */}
         <Route path="/planner"  element={<ImprovementPlanner />} />
         <Route path="/missions" element={<div style={{ padding: '24px', color: 'var(--text-s)' }}>任務管理（実装予定）</div>} />
-        <Route path="/forecast" element={<div style={{ padding: '24px', color: 'var(--text-s)' }}>達成予測（実装予定）</div>} />
+        <Route path="/forecast" element={<Forecast />} />
       </Routes>
     </HashRouter>
   )
