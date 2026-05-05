@@ -7,17 +7,6 @@ export type SpecialResourceId =
   | 'instantBuild'
   | 'devMaterial'
   | 'improveMaterial'
-  | 'newAviation'
-  | 'newArmament'
-  | 'newGunEquip'
-  | 'overseasTech'
-  | 'factoryMaterial'
-  | 'skilledPilot'
-  | 'nightSkilledPilot'
-  | 'catapult'
-  | 'report'
-  | 'combatReport'
-  | 'medal'
 
 /** 全資材のID */
 export type ResourceId = BasicResourceId | SpecialResourceId
