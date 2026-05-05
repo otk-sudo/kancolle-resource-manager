@@ -1,9 +1,10 @@
-import { useState, useMemo, useCallback } from 'react'
+import { useState, useEffect, useMemo, useCallback } from 'react'
 import { useResourceStore } from '../stores/resourceStore'
 import { ForecastCard } from '../components/forecast/ForecastCard'
 import { ForecastChart } from '../components/forecast/ForecastChart'
 import { calcDailyAvg, calcForecast, type HistoryResourceId } from '../lib/forecastCalc'
 import { buildChartData } from '../lib/forecastChartData'
+import { getCachedForecast, setCachedForecast, makeCacheKey, type CardDatum } from '../lib/forecastCache'
 
 const FORECAST_RESOURCES: { id: HistoryResourceId; label: string; defaultTarget: number }[] = [
   { id: 'fuel',          label: '燃料',       defaultTarget: 350000 },
@@ -19,8 +20,8 @@ const FORECAST_RESOURCES: { id: HistoryResourceId; label: string; defaultTarget:
 const DAY_OPTIONS = [7, 14, 30] as const
 type DayOption = typeof DAY_OPTIONS[number]
 
-export function Forecast() {
-  const { history, basicResources, specialResources } = useResourceStore()
+export default function Forecast() {
+  const { history, basicResources, specialResources, historyVersion } = useResourceStore()
 
   const [days, setDays]             = useState<DayOption>(7)
   const [selected, setSelected]     = useState<Set<HistoryResourceId>>(
@@ -30,6 +31,13 @@ export function Forecast() {
     Object.fromEntries(FORECAST_RESOURCES.map(r => [r.id, r.defaultTarget]))
   )
   const [editingTarget, setEditingTarget] = useState<HistoryResourceId | null>(null)
+
+  // チャートの遅延表示: カードを先に描画してからチャートを表示
+  const [chartReady, setChartReady] = useState(false)
+  useEffect(() => {
+    const id = requestAnimationFrame(() => setChartReady(true))
+    return () => cancelAnimationFrame(id)
+  }, [])
 
   const today = useMemo(() => new Date(), [])
 
@@ -53,18 +61,54 @@ export function Forecast() {
     [selected]
   )
 
-  const chartData = useMemo(() => {
-    if (history.length < 2 || selectedResources.length === 0) return null
-    const chartResources = selectedResources.map(r => ({
-      id: r.id,
-      label: r.label,
-      target: targets[r.id] ?? r.defaultTarget,
-    }))
-    return {
-      resources: chartResources,
-      data: buildChartData({ history, resources: chartResources, days, today }),
+  const selectedIds = useMemo(
+    () => selectedResources.map(r => r.id),
+    [selectedResources]
+  )
+
+  // キャッシュキー生成
+  const cacheKey = useMemo(
+    () => makeCacheKey(historyVersion, days, targets, selectedIds),
+    [historyVersion, days, targets, selectedIds]
+  )
+
+  // ForecastCard + Chart 計算（キャッシュ付き）
+  const { cardData, chartData } = useMemo(() => {
+    // キャッシュヒットならそのまま返す
+    const cached = getCachedForecast(cacheKey)
+    if (cached) return { cardData: cached.cardData, chartData: cached.chartData }
+
+    // カード計算
+    let cardData: CardDatum[] = []
+    if (history.length >= 2) {
+      cardData = selectedResources.map(r => {
+        const dailyAvg = calcDailyAvg(history, r.id, days)
+        const current  = currentValues[r.id] ?? 0
+        const target   = targets[r.id] ?? r.defaultTarget
+        const forecast = calcForecast({ current, target, dailyAvg, fromDate: today })
+        return { ...r, dailyAvg, current, target, forecast }
+      })
     }
-  }, [history, selectedResources, targets, days, today])
+
+    // チャート計算
+    let chartData = null
+    if (history.length >= 2 && selectedResources.length > 0) {
+      const chartResources = selectedResources.map(r => ({
+        id: r.id,
+        label: r.label,
+        target: targets[r.id] ?? r.defaultTarget,
+      }))
+      chartData = {
+        resources: chartResources,
+        data: buildChartData({ history, resources: chartResources, days, today }),
+      }
+    }
+
+    // キャッシュに保存
+    setCachedForecast({ key: cacheKey, cardData, chartData })
+
+    return { cardData, chartData }
+  }, [cacheKey, history, selectedResources, currentValues, targets, days, today])
 
   return (
     <main style={{ maxWidth: '1280px', margin: '0 auto', padding: '24px' }}>
@@ -129,28 +173,22 @@ export function Forecast() {
           gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))',
           gap: '14px',
         }}>
-          {selectedResources.map(r => {
-            const dailyAvg = calcDailyAvg(history, r.id, days)
-            const current  = currentValues[r.id] ?? 0
-            const target   = targets[r.id] ?? r.defaultTarget
-            const forecast = calcForecast({ current, target, dailyAvg, fromDate: today })
-
-            return (
+          {cardData.map(r => (
               <div key={r.id}>
                 <ForecastCard
                   label={r.label}
-                  current={current}
-                  target={target}
-                  dailyAvg={dailyAvg}
-                  reachable={forecast.reachable}
-                  daysLeft={forecast.daysLeft}
-                  reachDate={forecast.reachDate}
+                  current={r.current}
+                  target={r.target}
+                  dailyAvg={r.dailyAvg}
+                  reachable={r.forecast.reachable}
+                  daysLeft={r.forecast.daysLeft}
+                  reachDate={r.forecast.reachDate}
                 />
                 <div style={{ marginTop: '6px', textAlign: 'right' }}>
                   {editingTarget === r.id ? (
                     <input
                       type="number"
-                      defaultValue={target}
+                      defaultValue={r.target}
                       autoFocus
                       onBlur={e => {
                         const val = Number(e.target.value)
@@ -176,17 +214,16 @@ export function Forecast() {
                         fontSize: '11px', color: 'var(--text-s)',
                       }}
                     >
-                      目標: {target.toLocaleString()} ✎
+                      目標: {r.target.toLocaleString()} ✎
                     </button>
                   )}
                 </div>
               </div>
-            )
-          })}
+          ))}
         </div>
       )}
 
-      {chartData && (
+      {chartReady && chartData && (
         <div style={{ marginTop: '24px' }}>
           <ForecastChart data={chartData.data} resources={chartData.resources} />
         </div>
