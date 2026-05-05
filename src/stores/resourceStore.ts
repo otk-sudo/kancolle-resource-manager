@@ -18,6 +18,8 @@ interface ResourceState {
   setBasicResource: (id: BasicResourceId, value: number) => void
   setSpecialResource: (id: SpecialResourceId, value: number) => void
   addHistoryRecord: (record: ResourceHistoryRecord) => void
+  /** CSVインポート: 既存履歴とマージ（同日はnewRecords側で上書き） */
+  importHistory: (newRecords: ResourceHistoryRecord[]) => void
 }
 
 /** 基本資材の初期値 */
@@ -68,9 +70,33 @@ export const useResourceStore = create<ResourceState>()(
         set(state => ({
           history: [...state.history, record],
         })),
+
+      /** CSVインポート: 既存履歴とマージ（同日はnewRecords側で上書き） */
+      importHistory: (newRecords) =>
+        set(state => {
+          const merged = new Map<string, ResourceHistoryRecord>()
+          for (const r of state.history) merged.set(r.date, r)
+          for (const r of newRecords)    merged.set(r.date, r)
+          return {
+            history: Array.from(merged.values()).sort((a, b) => a.date.localeCompare(b.date)),
+          }
+        }),
     }),
     {
       name: 'resource-store',
+      version: 2,
+      migrate: (persisted: any, version: number) => {
+        if (version < 2) {
+          // v1→v2: 特殊資材を4種に絞り込む
+          const validIds = ['instantRepair', 'instantBuild', 'devMaterial', 'improveMaterial']
+          persisted.specialResources = (persisted.specialResources ?? [])
+            .filter((r: any) => validIds.includes(r.id))
+          if (persisted.specialResources.length === 0) {
+            persisted.specialResources = initialSpecialResources
+          }
+        }
+        return persisted
+      },
     }
   )
 )
@@ -78,7 +104,8 @@ export const useResourceStore = create<ResourceState>()(
 // テスト用に初期状態を取得する関数
 useResourceStore.getInitialState = () => ({
   ...initialState,
-  setBasicResource: useResourceStore.getState().setBasicResource,
+  setBasicResource:  useResourceStore.getState().setBasicResource,
   setSpecialResource: useResourceStore.getState().setSpecialResource,
-  addHistoryRecord: useResourceStore.getState().addHistoryRecord,
+  addHistoryRecord:  useResourceStore.getState().addHistoryRecord,
+  importHistory:     useResourceStore.getState().importHistory,
 })

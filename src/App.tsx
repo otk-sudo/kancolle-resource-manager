@@ -5,8 +5,21 @@ import { Dashboard } from './pages/Dashboard'
 import { ImprovementPlanner } from './pages/ImprovementPlanner'
 import { Forecast } from './pages/Forecast'
 import { MissionManager } from './pages/MissionManager'
+import { useCsvListener } from './hooks/useCsvListener'
+import { useCsvWatchStore } from './stores/csvWatchStore'
 
 function App() {
+  // CSVイベントリスナー起動
+  useCsvListener()
+
+  // 起動時に前回の監視を自動再開
+  useEffect(() => {
+    const { targets, startWatch } = useCsvWatchStore.getState()
+    if (targets.length > 0) {
+      startWatch().catch(() => {/* ファイルが存在しない場合は無視 */})
+    }
+  }, [])
+
   // localStorage からテーマを復元、デフォルトはダーク
   const [isDark, setIsDark] = useState<boolean>(() => {
     const saved = localStorage.getItem('theme')
