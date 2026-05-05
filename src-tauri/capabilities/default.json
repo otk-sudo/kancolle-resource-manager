@@ -10,6 +10,8 @@
     "dialog:allow-open",
     "fs:allow-read-text-file",
     "fs:allow-read-file",
-    "fs:read-all"
+    "fs:read-all",
+    "updater:default",
+    "process:allow-restart"
   ]
 }

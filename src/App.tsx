@@ -3,12 +3,17 @@ import { HashRouter, Routes, Route } from 'react-router-dom'
 import { Header } from './components/layout/Header'
 import { Dashboard } from './pages/Dashboard'
 import { Forecast } from './pages/Forecast'
+import { UpdateBanner } from './components/UpdateBanner'
 import { useCsvListener } from './hooks/useCsvListener'
+import { useAutoUpdate } from './hooks/useAutoUpdate'
 import { useCsvWatchStore } from './stores/csvWatchStore'
 
 function App() {
   // CSVイベントリスナー起動
   useCsvListener()
+
+  // 自動アップデート確認
+  const { status: updateStatus, installUpdate } = useAutoUpdate()
 
   // 起動時に前回の監視を自動再開
   useEffect(() => {
@@ -37,6 +42,13 @@ function App() {
 
   return (
     <HashRouter>
+      {updateStatus.available && updateStatus.version && (
+        <UpdateBanner
+          version={updateStatus.version}
+          downloading={updateStatus.downloading}
+          onInstall={installUpdate}
+        />
+      )}
       <Header isDark={isDark} onToggleTheme={() => setIsDark(prev => !prev)} />
       <Routes>
         <Route path="/" element={<Dashboard />} />

@@ -26,6 +26,10 @@ tauri-plugin-log = "2"
 tauri-plugin-dialog = "2"
 tauri-plugin-fs = "2"
 
+# 自動アップデート
+tauri-plugin-updater = "2"
+tauri-plugin-process = "2"
+
 # ファイル監視・文字コード変換
 notify = "6"
 tokio = { version = "1", features = ["full"] }
