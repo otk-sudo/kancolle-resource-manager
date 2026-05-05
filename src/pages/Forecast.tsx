@@ -1,11 +1,10 @@
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useCallback } from 'react'
 import { useResourceStore } from '../stores/resourceStore'
 import { ForecastCard } from '../components/forecast/ForecastCard'
 import { ForecastChart } from '../components/forecast/ForecastChart'
 import { calcDailyAvg, calcForecast, type HistoryResourceId } from '../lib/forecastCalc'
 import { buildChartData } from '../lib/forecastChartData'
 
-// 予測対象資材の定義
 const FORECAST_RESOURCES: { id: HistoryResourceId; label: string; defaultTarget: number }[] = [
   { id: 'fuel',          label: '燃料',       defaultTarget: 350000 },
   { id: 'ammo',          label: '弾薬',       defaultTarget: 350000 },
@@ -34,7 +33,6 @@ export function Forecast() {
 
   const today = useMemo(() => new Date(), [])
 
-  // 現在値の取得
   const currentValues = useMemo(() => {
     const map: Record<string, number> = {}
     basicResources.forEach(r => { map[r.id] = r.value })
@@ -42,28 +40,39 @@ export function Forecast() {
     return map
   }, [basicResources, specialResources])
 
-  // 選択切り替え
-  const toggleResource = (id: HistoryResourceId) => {
+  const toggleResource = useCallback((id: HistoryResourceId) => {
     setSelected(prev => {
       const next = new Set(prev)
       if (next.has(id)) { next.delete(id) } else { next.add(id) }
       return next
     })
-  }
+  }, [])
 
-  const selectedResources = FORECAST_RESOURCES.filter(r => selected.has(r.id))
+  const selectedResources = useMemo(
+    () => FORECAST_RESOURCES.filter(r => selected.has(r.id)),
+    [selected]
+  )
+
+  const chartData = useMemo(() => {
+    if (history.length < 2 || selectedResources.length === 0) return null
+    const chartResources = selectedResources.map(r => ({
+      id: r.id,
+      label: r.label,
+      target: targets[r.id] ?? r.defaultTarget,
+    }))
+    return {
+      resources: chartResources,
+      data: buildChartData({ history, resources: chartResources, days, today }),
+    }
+  }, [history, selectedResources, targets, days, today])
 
   return (
     <main style={{ maxWidth: '1280px', margin: '0 auto', padding: '24px' }}>
 
       {/* コントロールバー */}
       <div style={{ display: 'flex', gap: '24px', alignItems: 'flex-start', marginBottom: '24px', flexWrap: 'wrap' }}>
-
-        {/* 期間選択 */}
         <div>
-          <p style={{ fontSize: '11px', fontWeight: 700, color: 'var(--text-s)', marginBottom: '8px', textTransform: 'uppercase', letterSpacing: '0.08em' }}>
-            計算期間
-          </p>
+          <h2 className="section-heading">計算期間</h2>
           <div style={{ display: 'flex', gap: '6px' }}>
             {DAY_OPTIONS.map(d => (
               <button
@@ -82,16 +91,14 @@ export function Forecast() {
           </div>
         </div>
 
-        {/* 資材選択 */}
         <div style={{ flex: 1 }}>
-          <p style={{ fontSize: '11px', fontWeight: 700, color: 'var(--text-s)', marginBottom: '8px', textTransform: 'uppercase', letterSpacing: '0.08em' }}>
-            表示資材
-          </p>
+          <h2 className="section-heading">表示資材</h2>
           <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
             {FORECAST_RESOURCES.map(r => (
               <button
                 key={r.id}
                 onClick={() => toggleResource(r.id)}
+                aria-pressed={selected.has(r.id)}
                 style={{
                   padding: '5px 12px', fontSize: '12px', fontWeight: 600,
                   background: selected.has(r.id) ? 'var(--blue)' : 'var(--bg-card)',
@@ -106,7 +113,6 @@ export function Forecast() {
         </div>
       </div>
 
-      {/* 履歴データなし */}
       {history.length < 2 && (
         <div style={{
           textAlign: 'center', padding: '60px 20px',
@@ -117,7 +123,6 @@ export function Forecast() {
         </div>
       )}
 
-      {/* 予測カードグリッド */}
       {history.length >= 2 && (
         <div style={{
           display: 'grid',
@@ -141,7 +146,6 @@ export function Forecast() {
                   daysLeft={forecast.daysLeft}
                   reachDate={forecast.reachDate}
                 />
-                {/* 目標値編集 */}
                 <div style={{ marginTop: '6px', textAlign: 'right' }}>
                   {editingTarget === r.id ? (
                     <input
@@ -182,20 +186,11 @@ export function Forecast() {
         </div>
       )}
 
-      {/* 予測グラフ */}
-      {history.length >= 2 && selectedResources.length > 0 && (() => {
-        const chartResources = selectedResources.map(r => ({
-          id: r.id,
-          label: r.label,
-          target: targets[r.id] ?? r.defaultTarget,
-        }))
-        const chartData = buildChartData({ history, resources: chartResources, days, today })
-        return (
-          <div style={{ marginTop: '24px' }}>
-            <ForecastChart data={chartData} resources={chartResources} />
-          </div>
-        )
-      })()}
+      {chartData && (
+        <div style={{ marginTop: '24px' }}>
+          <ForecastChart data={chartData.data} resources={chartData.resources} />
+        </div>
+      )}
     </main>
   )
 }

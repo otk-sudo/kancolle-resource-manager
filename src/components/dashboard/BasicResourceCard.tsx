@@ -1,3 +1,4 @@
+import { memo } from 'react'
 import type { BasicResource } from '../../types/resource'
 
 /** 資材カードの色設定 */
@@ -17,7 +18,7 @@ interface Props {
 /** 数値をカンマ区切りにフォーマットする */
 const fmt = (n: number) => n.toLocaleString('ja-JP')
 
-export function BasicResourceCard({ resource, diff }: Props) {
+export const BasicResourceCard = memo(function BasicResourceCard({ resource, diff }: Props) {
   const pct = (resource.value / resource.cap * 100).toFixed(1)
   const color = colorMap[resource.id] ?? 'var(--blue)'
   const isUp = diff > 0
@@ -101,4 +102,4 @@ export function BasicResourceCard({ resource, diff }: Props) {
       </div>
     </div>
   )
-}
+})

@@ -37,7 +37,7 @@ describe('ForecastCard', () => {
 
     // Assert
     expect(screen.getByText(/334日後/)).toBeInTheDocument()
-    expect(screen.getByText(/2027-04-05/)).toBeInTheDocument()
+    expect(screen.getByText(/2027\/4\/5/)).toBeInTheDocument()
   })
 
   it('should display 到達不可 when not reachable', () => {

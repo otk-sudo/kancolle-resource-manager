@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useMemo, useCallback, memo } from 'react'
 import {
   LineChart,
   Line,
@@ -14,41 +14,40 @@ interface Props {
   history: ResourceHistoryRecord[]
 }
 
-/** グラフに表示する系列の定義 */
 const SERIES = [
-  { key: 'fuel',          name: '燃料',       color: 'var(--fuel)',  defaultVisible: true  },
-  { key: 'ammo',          name: '弾薬',       color: 'var(--ammo)',  defaultVisible: true  },
-  { key: 'steel',         name: '鋼材',       color: 'var(--steel)', defaultVisible: true  },
-  { key: 'baux',          name: 'ボーキ',     color: 'var(--baux)',  defaultVisible: true  },
-  { key: 'instantRepair', name: '高速修復材', color: '#a78bfa',      defaultVisible: true  },
-  { key: 'instantBuild',  name: '高速建造材', color: '#34d399',      defaultVisible: false },
-  { key: 'devMaterial',   name: '開発資材',   color: '#fb923c',      defaultVisible: false },
-  { key: 'improveMaterial', name: '改修資材', color: '#f472b6',      defaultVisible: false },
+  { key: 'fuel',            name: '燃料',       color: 'var(--fuel)',   defaultVisible: true  },
+  { key: 'ammo',            name: '弾薬',       color: 'var(--ammo)',   defaultVisible: true  },
+  { key: 'steel',           name: '鋼材',       color: 'var(--steel)',  defaultVisible: true  },
+  { key: 'baux',            name: 'ボーキ',     color: 'var(--baux)',   defaultVisible: true  },
+  { key: 'instantRepair',   name: '高速修復材', color: 'var(--purple)', defaultVisible: true  },
+  { key: 'instantBuild',    name: '高速建造材', color: 'var(--teal)',   defaultVisible: false },
+  { key: 'devMaterial',     name: '開発資材',   color: 'var(--orange)', defaultVisible: false },
+  { key: 'improveMaterial', name: '改修資材',   color: 'var(--pink)',   defaultVisible: false },
 ] as const
 
 const fmt = (n: number) => n.toLocaleString('ja-JP')
 
-export function ResourceChart({ history }: Props) {
-  // デフォルト表示状態を初期化
+export const ResourceChart = memo(function ResourceChart({ history }: Props) {
   const [visible, setVisible] = useState<Record<string, boolean>>(
     Object.fromEntries(SERIES.map(s => [s.key, s.defaultVisible]))
   )
 
-  const toggleSeries = (key: string) => {
+  const toggleSeries = useCallback((key: string) => {
     setVisible(prev => ({ ...prev, [key]: !prev[key] }))
-  }
+  }, [])
 
-  // 直近14日分のデータを使用
-  const chartData = history.slice(-14).map(r => ({
-    ...r,
-    // X軸ラベル用に日付を整形 (YYYY-MM-DD → M/D)
-    label: r.date.slice(5).replace('-', '/'),
-  }))
+  const chartData = useMemo(
+    () => history.slice(-14).map(r => ({
+      ...r,
+      label: r.date.slice(5).replace('-', '/'),
+    })),
+    [history]
+  )
 
   if (chartData.length === 0) {
     return (
       <div style={{ textAlign: 'center', padding: '40px', color: 'var(--text-m)', fontSize: '13px' }}>
-        履歴データがありません。CSVをアップロードするか、プロキシ接続を設定してください。
+        履歴データがありません。CSVをインポートしてください。
       </div>
     )
   }
@@ -58,9 +57,11 @@ export function ResourceChart({ history }: Props) {
       {/* 凡例 */}
       <div style={{ display: 'flex', gap: '16px', flexWrap: 'wrap', marginBottom: '16px' }}>
         {SERIES.map(s => (
-          <div
+          <button
             key={s.key}
             onClick={() => toggleSeries(s.key)}
+            aria-label={`${s.name}の表示を切替`}
+            aria-pressed={visible[s.key]}
             style={{
               display: 'flex',
               alignItems: 'center',
@@ -71,6 +72,10 @@ export function ResourceChart({ history }: Props) {
               opacity: visible[s.key] ? 1 : 0.35,
               userSelect: 'none',
               transition: 'opacity 0.15s',
+              background: 'none',
+              border: 'none',
+              padding: '2px 4px',
+              borderRadius: '4px',
             }}
           >
             <span style={{
@@ -81,11 +86,10 @@ export function ResourceChart({ history }: Props) {
               display: 'block',
             }} />
             {s.name}
-          </div>
+          </button>
         ))}
       </div>
 
-      {/* グラフ本体 */}
       <ResponsiveContainer width="100%" height={220}>
         <LineChart data={chartData} margin={{ top: 4, right: 8, left: 8, bottom: 4 }}>
           <CartesianGrid strokeDasharray="3 3" stroke="rgba(45,74,106,0.4)" />
@@ -129,4 +133,4 @@ export function ResourceChart({ history }: Props) {
       </ResponsiveContainer>
     </div>
   )
-}
+})

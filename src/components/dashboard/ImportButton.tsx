@@ -149,7 +149,7 @@ export function ImportButton() {
       )}
 
       {error && (
-        <p style={{ marginTop: '8px', fontSize: '12px', color: '#dc2626' }}>{error}</p>
+        <p role="alert" style={{ marginTop: '8px', fontSize: '12px', color: '#dc2626' }}>{error}</p>
       )}
     </div>
   )

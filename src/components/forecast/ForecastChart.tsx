@@ -1,3 +1,4 @@
+import { memo } from 'react'
 import {
   LineChart, Line, XAxis, YAxis, CartesianGrid,
   Tooltip, Legend, ReferenceLine, ResponsiveContainer,
@@ -5,8 +6,8 @@ import {
 import type { ChartDataPoint, ChartResource } from '../../lib/forecastChartData'
 
 const COLORS = [
-  '#3b82f6', '#ef4444', '#10b981', '#f59e0b',
-  '#8b5cf6', '#06b6d4', '#f97316', '#ec4899',
+  'var(--blue)', 'var(--red)', 'var(--green)', 'var(--amber)',
+  'var(--purple)', 'var(--cyan)', 'var(--orange)', 'var(--pink)',
 ]
 
 interface Props {
@@ -14,7 +15,7 @@ interface Props {
   resources: ChartResource[]
 }
 
-export function ForecastChart({ data, resources }: Props) {
+export const ForecastChart = memo(function ForecastChart({ data, resources }: Props) {
   if (data.length === 0) return null
 
   const firstForecastDate = data.find(p => p.type === 'forecast')?.date
@@ -67,7 +68,6 @@ export function ForecastChart({ data, resources }: Props) {
           />
           <Legend wrapperStyle={{ fontSize: '12px', color: 'var(--text-s)' }} />
 
-          {/* 目標100%ライン */}
           <ReferenceLine
             y={100}
             stroke="var(--green)"
@@ -75,7 +75,6 @@ export function ForecastChart({ data, resources }: Props) {
             label={{ value: '目標', fill: 'var(--green)', fontSize: 11, position: 'insideTopRight' }}
           />
 
-          {/* 今日の境界ライン */}
           {firstForecastDate && (
             <ReferenceLine
               x={firstForecastDate}
@@ -85,11 +84,9 @@ export function ForecastChart({ data, resources }: Props) {
             />
           )}
 
-          {/* 資材ごとに実績線・予測線の2本を描画 */}
           {resources.map((res, i) => {
             const color = COLORS[i % COLORS.length]
             return [
-              // 実線（実績）
               <Line
                 key={`${res.id}_hist`}
                 type="monotone"
@@ -101,7 +98,6 @@ export function ForecastChart({ data, resources }: Props) {
                 connectNulls={false}
                 legendType="line"
               />,
-              // 破線（予測）
               <Line
                 key={`${res.id}_fcst`}
                 type="monotone"
@@ -120,4 +116,4 @@ export function ForecastChart({ data, resources }: Props) {
       </ResponsiveContainer>
     </div>
   )
-}
+})

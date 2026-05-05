@@ -1,3 +1,5 @@
+import { memo } from 'react'
+
 interface Props {
   label: string
   current: number
@@ -9,9 +11,9 @@ interface Props {
 }
 
 const fmt = (n: number) => n.toLocaleString()
-const fmtDate = (d: Date) => d.toISOString().slice(0, 10)
+const fmtDate = (d: Date) => d.toLocaleDateString('ja-JP')
 
-export function ForecastCard({ label, current, target, dailyAvg, reachable, daysLeft, reachDate }: Props) {
+export const ForecastCard = memo(function ForecastCard({ label, current, target, dailyAvg, reachable, daysLeft, reachDate }: Props) {
   const progress = Math.min(100, Math.round((current / target) * 100))
 
   const statusColor = !reachable
@@ -69,4 +71,4 @@ export function ForecastCard({ label, current, target, dailyAvg, reachable, days
       )}
     </div>
   )
-}
+})
