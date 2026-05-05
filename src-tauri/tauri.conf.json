@@ -26,6 +26,7 @@
   "bundle": {
     "active": true,
     "targets": "all",
+    "createUpdaterArtifacts": true,
     "icon": [
       "icons/32x32.png",
       "icons/128x128.png",
@@ -35,6 +36,14 @@
     ],
     "android": {
       "debugApplicationIdSuffix": ".debug"
+    }
+  },
+  "plugins": {
+    "updater": {
+      "endpoints": [
+        "https://github.com/otk-sudo/kancolle-resource-manager/releases/latest/download/latest.json"
+      ],
+      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IEU0QzU3MTU0ODA1OTBGMzUKUldRMUQxbUFWSEhGNU9sRDBLRU42NGxMRGE4cWd4bXdNc3pzL3lrODIwWmJmSTJyOGJ1RFNVMDMK"
     }
   }
 }
