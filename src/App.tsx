@@ -2,9 +2,7 @@ import { useState, useEffect } from 'react'
 import { HashRouter, Routes, Route } from 'react-router-dom'
 import { Header } from './components/layout/Header'
 import { Dashboard } from './pages/Dashboard'
-import { ImprovementPlanner } from './pages/ImprovementPlanner'
 import { Forecast } from './pages/Forecast'
-import { MissionManager } from './pages/MissionManager'
 import { useCsvListener } from './hooks/useCsvListener'
 import { useCsvWatchStore } from './stores/csvWatchStore'
 
@@ -43,8 +41,6 @@ function App() {
       <Routes>
         <Route path="/" element={<Dashboard />} />
         {/* 他画面は今後実装 */}
-        <Route path="/planner"  element={<ImprovementPlanner />} />
-        <Route path="/missions" element={<MissionManager />} />
         <Route path="/forecast" element={<Forecast />} />
       </Routes>
     </HashRouter>
