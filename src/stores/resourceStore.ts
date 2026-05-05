@@ -30,21 +30,10 @@ const initialBasicResources: BasicResource[] = [
 
 /** 特殊資材の初期値 */
 const initialSpecialResources: SpecialResource[] = [
-  { id: 'instantRepair',    name: '高速修復材',      value: 0, cap: 3000 },
-  { id: 'instantBuild',     name: '高速建造材',      value: 0, cap: 3000 },
-  { id: 'devMaterial',      name: '開発資材',        value: 0, cap: 3000 },
-  { id: 'improveMaterial',  name: '改修資材',        value: 0, cap: 3000 },
-  { id: 'newAviation',      name: '新型航空兵装資材', value: 0 },
-  { id: 'newArmament',      name: '新型兵装資材',    value: 0 },
-  { id: 'newGunEquip',      name: '新型砲熕兵装資材', value: 0 },
-  { id: 'overseasTech',     name: '海外最新技術',    value: 0 },
-  { id: 'factoryMaterial',  name: '工廠資材',        value: 0 },
-  { id: 'skilledPilot',     name: '熟練搭乗員',      value: 0 },
-  { id: 'nightSkilledPilot', name: '夜間熟練搭乗員',  value: 0 },
-  { id: 'catapult',         name: 'カタパルト',      value: 0 },
-  { id: 'report',           name: '詳報',            value: 0 },
-  { id: 'combatReport',     name: '戦闘詳報',        value: 0 },
-  { id: 'medal',            name: '勲章',            value: 0 },
+  { id: 'instantRepair',   name: '高速修復材', value: 0, cap: 3000 },
+  { id: 'instantBuild',    name: '高速建造材', value: 0, cap: 3000 },
+  { id: 'devMaterial',     name: '開発資材',   value: 0, cap: 3000 },
+  { id: 'improveMaterial', name: '改修資材',   value: 0, cap: 3000 },
 ]
 
 const initialState = {

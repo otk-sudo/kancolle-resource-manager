@@ -45,36 +45,21 @@ describe('useResourceStore', () => {
   })
 
   describe('特殊資材', () => {
-    it('should initialize special resources with 15 items', () => {
+    it('should initialize special resources with 4 items', () => {
       // Arrange & Act
       const { specialResources } = useResourceStore.getState()
 
       // Assert
-      expect(specialResources).toHaveLength(15)
+      expect(specialResources).toHaveLength(4)
     })
 
-    it('should have cap of 3000 for instantRepair, instantBuild, devMaterial, improveMaterial', () => {
+    it('should have cap of 3000 for all special resources', () => {
       // Arrange & Act
       const { specialResources } = useResourceStore.getState()
 
       // Assert
-      const cappedIds = ['instantRepair', 'instantBuild', 'devMaterial', 'improveMaterial']
-      cappedIds.forEach(id => {
-        const resource = specialResources.find(r => r.id === id)
-        expect(resource?.cap).toBe(3000)
-      })
-    })
-
-    it('should not have cap for other special resources', () => {
-      // Arrange & Act
-      const { specialResources } = useResourceStore.getState()
-
-      // Assert
-      const noCap = specialResources.filter(
-        r => !['instantRepair', 'instantBuild', 'devMaterial', 'improveMaterial'].includes(r.id)
-      )
-      noCap.forEach(r => {
-        expect(r.cap).toBeUndefined()
+      specialResources.forEach(r => {
+        expect(r.cap).toBe(3000)
       })
     })
 
