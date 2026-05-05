@@ -1,3 +1,4 @@
+import { memo } from 'react'
 import type { SpecialResource } from '../../types/resource'
 
 const fmt = (n: number) => n.toLocaleString('ja-JP')
@@ -6,11 +7,11 @@ interface Props {
   resources: SpecialResource[]
 }
 
-export function SpecialResourceGrid({ resources }: Props) {
+export const SpecialResourceGrid = memo(function SpecialResourceGrid({ resources }: Props) {
   return (
     <div style={{
       display: 'grid',
-      gridTemplateColumns: 'repeat(5, 1fr)',
+      gridTemplateColumns: 'repeat(auto-fill, minmax(130px, 1fr))',
       gap: '10px',
     }}>
       {resources.map(r => (
@@ -23,7 +24,6 @@ export function SpecialResourceGrid({ resources }: Props) {
             padding: '12px 14px',
           }}
         >
-          {/* 資材名 */}
           <div style={{
             fontSize: '10px',
             color: 'var(--text-s)',
@@ -33,23 +33,16 @@ export function SpecialResourceGrid({ resources }: Props) {
             {r.name}
           </div>
 
-          {/* 現在値 */}
-          {r.cap !== undefined ? (
-            // 上限あり資材: "523 / 3,000" 形式で表示
-            <div style={{ fontSize: '16px', fontWeight: 700 }}>
-              {fmt(r.value)}{' '}
+          <div style={{ fontSize: '16px', fontWeight: 700 }}>
+            {fmt(r.value)}{' '}
+            {r.cap !== undefined && (
               <span style={{ fontSize: '11px', color: 'var(--text-m)', fontWeight: 400 }}>
                 / {fmt(r.cap)}
               </span>
-            </div>
-          ) : (
-            // 上限なし資材: 個数のみ表示
-            <div style={{ fontSize: '22px', fontWeight: 700 }}>
-              {fmt(r.value)}
-            </div>
-          )}
+            )}
+          </div>
         </div>
       ))}
     </div>
   )
-}
+})

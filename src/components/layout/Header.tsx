@@ -1,3 +1,4 @@
+import { memo } from 'react'
 import { NavLink } from 'react-router-dom'
 
 interface Props {
@@ -5,7 +6,7 @@ interface Props {
   onToggleTheme: () => void
 }
 
-export function Header({ isDark, onToggleTheme }: Props) {
+export const Header = memo(function Header({ isDark, onToggleTheme }: Props) {
   const navStyle = ({ isActive }: { isActive: boolean }): React.CSSProperties => ({
     padding: '6px 14px',
     color: isActive ? '#fff' : 'var(--text-s)',
@@ -36,7 +37,6 @@ export function Header({ isDark, onToggleTheme }: Props) {
         alignItems: 'center',
         gap: '32px',
       }}>
-        {/* サイトタイトル */}
         <div style={{
           fontSize: '17px',
           fontWeight: 700,
@@ -49,15 +49,14 @@ export function Header({ isDark, onToggleTheme }: Props) {
           ⚓ 提督資材管理
         </div>
 
-        {/* ナビゲーション */}
         <nav style={{ display: 'flex', gap: '4px' }}>
           <NavLink to="/" end style={navStyle}>ダッシュボード</NavLink>
           <NavLink to="/forecast" style={navStyle}>達成予測</NavLink>
         </nav>
 
-        {/* テーマ切り替え */}
         <button
           onClick={onToggleTheme}
+          aria-label={isDark ? 'ライトモードに切替' : 'ダークモードに切替'}
           style={{
             marginLeft: 'auto',
             padding: '6px 12px',
@@ -74,4 +73,4 @@ export function Header({ isDark, onToggleTheme }: Props) {
       </div>
     </header>
   )
-}
+})

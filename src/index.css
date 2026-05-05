@@ -5,11 +5,13 @@
 /* ライトモード（デフォルト） */
 :root {
   --bg-base:    #f0f4f8;
+  --bg:         #f8fafc;
   --bg-card:    #ffffff;
   --bg-dark:    #e2e8f0;
   --border:     #cbd5e1;
   --border-l:   #94a3b8;
   --text:       #1e293b;
+  --text-h:     #0f172a;
   --text-s:     #475569;
   --text-m:     #94a3b8;
   --blue:       #2563eb;
@@ -17,6 +19,10 @@
   --green:      #16a34a;
   --amber:      #d97706;
   --red:        #dc2626;
+  --purple:     #a78bfa;
+  --teal:       #34d399;
+  --orange:     #fb923c;
+  --pink:       #f472b6;
   --fuel:       #2563eb;
   --ammo:       #d97706;
   --steel:      #64748b;
@@ -26,11 +32,13 @@
 /* ダークモード */
 .dark {
   --bg-base:    #0d1b2a;
+  --bg:         #152232;
   --bg-card:    #1b2d40;
   --bg-dark:    #0a1520;
   --border:     #2d4a6a;
   --border-l:   #3a5a7a;
   --text:       #d4e4f4;
+  --text-h:     #eef4fa;
   --text-s:     #7a9ab8;
   --text-m:     #4a6a88;
   --blue:       #5b9bd5;
@@ -38,6 +46,10 @@
   --green:      #4ab88a;
   --amber:      #d4a04a;
   --red:        #d45b5b;
+  --purple:     #b49aff;
+  --teal:       #5ed4a8;
+  --orange:     #ffa857;
+  --pink:       #ff8cc8;
   --fuel:       #5b9bd5;
   --ammo:       #d4a04a;
   --steel:      #8aacba;
@@ -69,3 +81,37 @@ body {
 ::-webkit-scrollbar-track { background: var(--bg-base); }
 ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
 ::-webkit-scrollbar-thumb:hover { background: var(--border-l); }
+
+/* ===== ボタン共通 ===== */
+button {
+  font-family: inherit;
+  transition: opacity 0.15s, filter 0.15s;
+}
+button:hover:not(:disabled) { filter: brightness(1.1); }
+button:active:not(:disabled) { filter: brightness(0.95); }
+button:focus-visible {
+  outline: 2px solid var(--blue);
+  outline-offset: 2px;
+}
+button:disabled { cursor: not-allowed; }
+
+/* ===== セクション見出し ===== */
+.section-heading {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text-s);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.section-heading::before {
+  content: '';
+  display: block;
+  width: 3px;
+  height: 12px;
+  background: var(--blue);
+  border-radius: 2px;
+}
