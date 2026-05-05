@@ -3,8 +3,23 @@ import { useResourceStore } from './resourceStore'
 
 describe('useResourceStore', () => {
   beforeEach(() => {
-    // 各テスト前にストアをリセット
-    useResourceStore.setState(useResourceStore.getInitialState())
+    // 各テスト前にストアを初期状態にリセット
+    useResourceStore.setState({
+      basicResources: [
+        { id: 'fuel',  name: '燃料',        value: 0, cap: 350000 },
+        { id: 'ammo',  name: '弾薬',        value: 0, cap: 350000 },
+        { id: 'steel', name: '鋼材',        value: 0, cap: 350000 },
+        { id: 'baux',  name: 'ボーキサイト', value: 0, cap: 350000 },
+      ],
+      specialResources: [
+        { id: 'instantRepair',   name: '高速修復材', value: 0, cap: 3000 },
+        { id: 'instantBuild',    name: '高速建造材', value: 0, cap: 3000 },
+        { id: 'devMaterial',     name: '開発資材',   value: 0, cap: 3000 },
+        { id: 'improveMaterial', name: '改修資材',   value: 0, cap: 3000 },
+      ],
+      history: [],
+      historyVersion: 0,
+    })
   })
 
   describe('基本資材', () => {
@@ -86,9 +101,9 @@ describe('useResourceStore', () => {
       expect(history).toHaveLength(0)
     })
 
-    it('should add a history record when addHistoryRecord is called', () => {
+    it('should merge and sort history when importHistory is called', () => {
       // Arrange
-      const { addHistoryRecord } = useResourceStore.getState()
+      const { importHistory } = useResourceStore.getState()
       const record = {
         date: '2026-05-05',
         fuel: 245000,
@@ -102,7 +117,7 @@ describe('useResourceStore', () => {
       }
 
       // Act
-      addHistoryRecord(record)
+      importHistory([record])
 
       // Assert
       const { history } = useResourceStore.getState()

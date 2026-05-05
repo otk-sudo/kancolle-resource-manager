@@ -4,7 +4,8 @@ import type { ResourceHistoryRecord } from '../types/resource'
 export type HistoryResourceId = Exclude<keyof ResourceHistoryRecord, 'date'>
 
 /**
- * 直近N件のヒストリーから指定資材の1日あたり平均増減を計算する。
+ * 直近N日分の履歴から指定資材の1日あたり平均増減を返す。
+ * 履歴はstoreでソート済みのためそのまま末尾N件を使用する。
  * レコードが1件以下の場合は 0 を返す。
  */
 export function calcDailyAvg(
@@ -12,7 +13,6 @@ export function calcDailyAvg(
   resourceId: HistoryResourceId,
   days: number,
 ): number {
-  // historyはstoreでソート済みのためそのまま使用
   const slice = history.slice(-days)
   if (slice.length < 2) return 0
 
@@ -20,15 +20,12 @@ export function calcDailyAvg(
   const last  = slice[slice.length - 1]
   const diff  = (last[resourceId] as number) - (first[resourceId] as number)
 
-  // 日数差（文字列YYYY-MM-DDで計算）
   const daysDiff =
     (new Date(last.date).getTime() - new Date(first.date).getTime()) / 86400000
 
   if (daysDiff === 0) return 0
   return diff / daysDiff
 }
-
-// ─── calcForecast ─────────────────────────────────────────────
 
 export interface ForecastInput {
   current:  number
@@ -44,7 +41,8 @@ export interface ForecastResult {
 }
 
 /**
- * 現在値・目標値・1日平均増減から到達予測を計算する。
+ * 現在値・目標値・1日平均増減から目標到達予測を計算する。
+ * dailyAvg が 0 以下（減少中）の場合は到達不可とみなす。
  */
 export function calcForecast({ current, target, dailyAvg, fromDate }: ForecastInput): ForecastResult {
   const unreachable: ForecastResult = { reachable: false, daysLeft: null, reachDate: null }
