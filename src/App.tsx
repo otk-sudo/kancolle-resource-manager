@@ -5,8 +5,13 @@ import { Dashboard } from './pages/Dashboard'
 import { ImprovementPlanner } from './pages/ImprovementPlanner'
 import { Forecast } from './pages/Forecast'
 import { MissionManager } from './pages/MissionManager'
+import { ProxySettings } from './pages/ProxySettings'
+import { useKcsapiListener } from './hooks/useKcsapiListener'
 
 function App() {
+  // kcsapi イベントリスナーを起動
+  useKcsapiListener()
+
   // localStorage からテーマを復元、デフォルトはダーク
   const [isDark, setIsDark] = useState<boolean>(() => {
     const saved = localStorage.getItem('theme')
@@ -33,6 +38,7 @@ function App() {
         <Route path="/planner"  element={<ImprovementPlanner />} />
         <Route path="/missions" element={<MissionManager />} />
         <Route path="/forecast" element={<Forecast />} />
+        <Route path="/proxy"    element={<ProxySettings />} />
       </Routes>
     </HashRouter>
   )

@@ -55,6 +55,7 @@ export function Header({ isDark, onToggleTheme }: Props) {
           <NavLink to="/planner" style={navStyle}>改修計画</NavLink>
           <NavLink to="/missions" style={navStyle}>任務管理</NavLink>
           <NavLink to="/forecast" style={navStyle}>達成予測</NavLink>
+          <NavLink to="/proxy" style={navStyle}>プロキシ</NavLink>
         </nav>
 
         {/* テーマ切り替え */}
