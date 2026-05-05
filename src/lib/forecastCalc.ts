@@ -12,8 +12,8 @@ export function calcDailyAvg(
   resourceId: HistoryResourceId,
   days: number,
 ): number {
-  const sorted = [...history].sort((a, b) => a.date.localeCompare(b.date))
-  const slice  = sorted.slice(-days)
+  // historyはstoreでソート済みのためそのまま使用
+  const slice = history.slice(-days)
   if (slice.length < 2) return 0
 
   const first = slice[0]

@@ -1,12 +1,13 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, lazy, Suspense } from 'react'
 import { HashRouter, Routes, Route } from 'react-router-dom'
 import { Header } from './components/layout/Header'
 import { Dashboard } from './pages/Dashboard'
-import { Forecast } from './pages/Forecast'
 import { UpdateBanner } from './components/UpdateBanner'
 import { useCsvListener } from './hooks/useCsvListener'
 import { useAutoUpdate } from './hooks/useAutoUpdate'
 import { useCsvWatchStore } from './stores/csvWatchStore'
+
+const Forecast = lazy(() => import('./pages/Forecast'))
 
 function App() {
   // CSVイベントリスナー起動
@@ -53,7 +54,11 @@ function App() {
       <Routes>
         <Route path="/" element={<Dashboard />} />
         {/* 他画面は今後実装 */}
-        <Route path="/forecast" element={<Forecast />} />
+        <Route path="/forecast" element={
+          <Suspense fallback={<div style={{ textAlign: 'center', padding: '60px', color: 'var(--text-s)' }}>読み込み中...</div>}>
+            <Forecast />
+          </Suspense>
+        } />
       </Routes>
     </HashRouter>
   )

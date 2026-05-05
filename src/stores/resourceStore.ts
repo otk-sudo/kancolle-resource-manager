@@ -13,6 +13,8 @@ interface ResourceState {
   basicResources: BasicResource[]
   specialResources: SpecialResource[]
   history: ResourceHistoryRecord[]
+  /** 履歴が更新されるたびにインクリメントされるバージョン番号 */
+  historyVersion: number
 
   // アクション
   setBasicResource: (id: BasicResourceId, value: number) => void
@@ -42,6 +44,7 @@ const initialState = {
   basicResources: initialBasicResources,
   specialResources: initialSpecialResources,
   history: [] as ResourceHistoryRecord[],
+  historyVersion: 0,
 }
 
 export const useResourceStore = create<ResourceState>()(
@@ -69,6 +72,7 @@ export const useResourceStore = create<ResourceState>()(
       addHistoryRecord: (record) =>
         set(state => ({
           history: [...state.history, record],
+          historyVersion: state.historyVersion + 1,
         })),
 
       /** CSVインポート: 既存履歴とマージ（同日はnewRecords側で上書き） */
@@ -79,6 +83,7 @@ export const useResourceStore = create<ResourceState>()(
           for (const r of newRecords)    merged.set(r.date, r)
           return {
             history: Array.from(merged.values()).sort((a, b) => a.date.localeCompare(b.date)),
+            historyVersion: state.historyVersion + 1,
           }
         }),
     }),
