@@ -1,5 +1,7 @@
 import { memo } from 'react'
 import type { BasicResource } from '../../types/resource'
+import { DiffIndicator } from './DiffIndicator'
+import { fmt } from '../../lib/format'
 
 /** 資材カードの色設定 */
 const colorMap: Record<string, string> = {
@@ -15,14 +17,9 @@ interface Props {
   diff: number
 }
 
-/** 数値をカンマ区切りにフォーマットする */
-const fmt = (n: number) => n.toLocaleString('ja-JP')
-
 export const BasicResourceCard = memo(function BasicResourceCard({ resource, diff }: Props) {
   const pct = (resource.value / resource.cap * 100).toFixed(1)
   const color = colorMap[resource.id] ?? 'var(--blue)'
-  const isUp = diff > 0
-  const isDown = diff < 0
 
   return (
     <div style={{
@@ -89,16 +86,8 @@ export const BasicResourceCard = memo(function BasicResourceCard({ resource, dif
       </div>
 
       {/* 前日比 */}
-      <div style={{
-        fontSize: '12px',
-        display: 'flex',
-        alignItems: 'center',
-        gap: '4px',
-        color: isUp ? 'var(--green)' : isDown ? 'var(--red)' : 'var(--text-m)',
-      }}>
-        {isUp && `▲ +${fmt(diff)} / 前日比`}
-        {isDown && `▼ ${fmt(diff)} / 前日比`}
-        {!isUp && !isDown && `± 0 / 前日比`}
+      <div style={{ fontSize: '12px' }}>
+        <DiffIndicator diff={diff} />
       </div>
     </div>
   )
