@@ -4,15 +4,17 @@ import { BasicResourceCard } from '../components/dashboard/BasicResourceCard'
 import { SpecialResourceGrid } from '../components/dashboard/SpecialResourceGrid'
 import { ResourceChart } from '../components/dashboard/ResourceChart'
 import { ImportButton } from '../components/dashboard/ImportButton'
+import type { ResourceId } from '../types/resource'
 
 export function Dashboard() {
   const { basicResources, specialResources, history } = useResourceStore()
 
-  const getDiff = useCallback((id: string): number => {
+  /** ResourceId型に限定することでキャスト不要（ResourceHistoryRecordのResourceIdプロパティは全てnumber型） */
+  const getDiff = useCallback((id: ResourceId): number => {
     if (history.length < 2) return 0
     const today = history[history.length - 1]
     const yesterday = history[history.length - 2]
-    return (today[id as keyof typeof today] as number) - (yesterday[id as keyof typeof yesterday] as number)
+    return today[id] - yesterday[id]
   }, [history])
 
   return (
@@ -38,7 +40,15 @@ export function Dashboard() {
 
       <h2 className="section-heading">特殊資材</h2>
       <div style={{ marginBottom: '20px' }}>
-        <SpecialResourceGrid resources={specialResources} />
+        <SpecialResourceGrid
+          resources={specialResources}
+          diffs={{
+            instantRepair:   getDiff('instantRepair'),
+            instantBuild:    getDiff('instantBuild'),
+            devMaterial:     getDiff('devMaterial'),
+            improveMaterial: getDiff('improveMaterial'),
+          }}
+        />
       </div>
 
       <h2 className="section-heading">14日間推移</h2>
