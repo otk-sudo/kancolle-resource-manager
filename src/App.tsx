@@ -1,4 +1,4 @@
-import { useState, useEffect, lazy, Suspense } from 'react'
+import { useEffect, lazy, Suspense } from 'react'
 import { HashRouter, Routes, Route } from 'react-router-dom'
 import { Header } from './components/layout/Header'
 import { Dashboard } from './pages/Dashboard'
@@ -6,6 +6,7 @@ import { UpdateBanner } from './components/UpdateBanner'
 import { useCsvListener } from './hooks/useCsvListener'
 import { useAutoUpdate } from './hooks/useAutoUpdate'
 import { useCsvWatchStore } from './stores/csvWatchStore'
+import { useThemeStore } from './stores/themeStore'
 
 const Forecast = lazy(() => import('./pages/Forecast'))
 
@@ -24,11 +25,13 @@ function App() {
     }
   }, [])
 
-  // localStorage からテーマを復元、デフォルトはダーク
-  const [isDark, setIsDark] = useState<boolean>(() => {
-    const saved = localStorage.getItem('theme')
-    return saved ? saved === 'dark' : true
-  })
+  // themeStore からテーマ状態とアクションを取得
+  const { isDark, toggleTheme, initFromStorage } = useThemeStore()
+
+  // 初期化時に localStorage からテーマを復元
+  useEffect(() => {
+    initFromStorage()
+  }, [initFromStorage])
 
   // html要素に .dark クラスを付与してテーマを切り替える
   useEffect(() => {
@@ -38,7 +41,6 @@ function App() {
     } else {
       root.classList.remove('dark')
     }
-    localStorage.setItem('theme', isDark ? 'dark' : 'light')
   }, [isDark])
 
   return (
@@ -50,7 +52,7 @@ function App() {
           onInstall={installUpdate}
         />
       )}
-      <Header isDark={isDark} onToggleTheme={() => setIsDark(prev => !prev)} />
+      <Header isDark={isDark} onToggleTheme={toggleTheme} />
       <Routes>
         <Route path="/" element={<Dashboard />} />
         {/* 他画面は今後実装 */}

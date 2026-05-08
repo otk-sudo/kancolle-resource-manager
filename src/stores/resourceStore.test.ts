@@ -126,4 +126,61 @@ describe('useResourceStore', () => {
       expect(history[0].fuel).toBe(245000)
     })
   })
+
+  describe('updateFromLatest', () => {
+    it('should update all resources from latest record', () => {
+      // Arrange: 最新レコード1件を用意する
+      const latest = {
+        date: '2026-05-08',
+        fuel: 300000,
+        ammo: 250000,
+        steel: 280000,
+        baux: 120000,
+        instantRepair: 600,
+        instantBuild: 90,
+        devMaterial: 400,
+        improveMaterial: 25,
+      }
+      const { updateFromLatest } = useResourceStore.getState()
+
+      // Act: updateFromLatest を単一呼び出しで実行する
+      updateFromLatest(latest)
+
+      // Assert: basicResources の全4資材が更新されていること
+      const { basicResources, specialResources } = useResourceStore.getState()
+      expect(basicResources.find(r => r.id === 'fuel')?.value).toBe(300000)
+      expect(basicResources.find(r => r.id === 'ammo')?.value).toBe(250000)
+      expect(basicResources.find(r => r.id === 'steel')?.value).toBe(280000)
+      expect(basicResources.find(r => r.id === 'baux')?.value).toBe(120000)
+      // Assert: specialResources の全4資材が更新されていること
+      expect(specialResources.find(r => r.id === 'instantRepair')?.value).toBe(600)
+      expect(specialResources.find(r => r.id === 'instantBuild')?.value).toBe(90)
+      expect(specialResources.find(r => r.id === 'devMaterial')?.value).toBe(400)
+      expect(specialResources.find(r => r.id === 'improveMaterial')?.value).toBe(25)
+    })
+
+    it('should increment historyVersion when updateFromLatest is called', () => {
+      // Arrange: 初期 historyVersion を確認する
+      const initialVersion = useResourceStore.getState().historyVersion
+      const latest = {
+        date: '2026-05-08',
+        fuel: 100000,
+        ammo: 100000,
+        steel: 100000,
+        baux: 50000,
+        instantRepair: 100,
+        instantBuild: 50,
+        devMaterial: 100,
+        improveMaterial: 10,
+      }
+      const { updateFromLatest } = useResourceStore.getState()
+
+      // Act: updateFromLatest を呼び出す
+      updateFromLatest(latest)
+
+      // Assert: historyVersion がインクリメントされていること
+      const { historyVersion } = useResourceStore.getState()
+      expect(historyVersion).toBe(initialVersion + 1)
+    })
+  })
 })

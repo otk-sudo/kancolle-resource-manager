@@ -19,6 +19,8 @@ interface ResourceState {
   setSpecialResource: (id: SpecialResourceId, value: number) => void
   /** CSVインポート: 既存履歴とマージ（同日はnewRecords側で上書き・日付順ソート済み） */
   importHistory: (newRecords: ResourceHistoryRecord[]) => void
+  /** 最新レコードから8資源を一括更新し、historyVersion をインクリメント */
+  updateFromLatest: (latest: ResourceHistoryRecord) => void
 }
 
 const initialBasicResources: BasicResource[] = [
@@ -71,6 +73,14 @@ export const useResourceStore = create<ResourceState>()(
             historyVersion: state.historyVersion + 1,
           }
         }),
+
+      // 最新レコードから basicResources / specialResources を一括更新し historyVersion をインクリメント
+      updateFromLatest: (latest) =>
+        set(state => ({
+          basicResources: state.basicResources.map(r => ({ ...r, value: latest[r.id] })),
+          specialResources: state.specialResources.map(r => ({ ...r, value: latest[r.id] })),
+          historyVersion: state.historyVersion + 1,
+        })),
     }),
     {
       name: 'resource-store',
