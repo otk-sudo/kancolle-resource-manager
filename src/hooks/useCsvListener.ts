@@ -31,17 +31,9 @@ export function useCsvListener() {
       useResourceStore.getState().importHistory(records)
       useCsvWatchStore.getState().setLastImportAt(new Date().toISOString())
 
-      // 最新レコードの値でダッシュボードの現在値を更新
+      // 最新レコードの値でダッシュボードの現在値を一括更新
       const latest = records[records.length - 1]
-      const { setBasicResource, setSpecialResource } = useResourceStore.getState()
-      setBasicResource('fuel',  latest.fuel)
-      setBasicResource('ammo',  latest.ammo)
-      setBasicResource('steel', latest.steel)
-      setBasicResource('baux',  latest.baux)
-      setSpecialResource('instantRepair',   latest.instantRepair)
-      setSpecialResource('instantBuild',    latest.instantBuild)
-      setSpecialResource('devMaterial',     latest.devMaterial)
-      setSpecialResource('improveMaterial', latest.improveMaterial)
+      useResourceStore.getState().updateFromLatest(latest)
     })
 
     return () => { unlisten.then(fn => fn()) }
